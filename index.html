@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArcGIS API Playground</title>
+    <style>
+        html,
+        body,
+        #viewDiv{
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.27/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.27/"></script>
+
+    <script>
+        let locs = ["75.585788, 28.355027", "77.24422, 28.57605", "77.223071, 28.591025", "77.226958, 28.600193", "77.193519, 28.553176", "77.199762, 28.517482","77.198359,28.594718","77.244233,28.547585", "77.081847,28.629751", "77.222187,28.633802", "77.207547,28.573408", "72.548914,23.037146", "72.687218,23.057363", "72.588416,23.023526", "72.572239,23.034800"];
+        let name = ["Home", "Lajpat Nagar PG", "WWF-India", "Khan Market", "Hauz Khas Fort", "Champa Gali Saket", "Cafe-De-Flora Chanakyapuri", "Local Cafe - Greater Kailash", "Janakpuri District Center", "Andhra Canteen - Connaught Place", "Dilli Hatt - INA", "CEPT University", "Auto World Vintage Car Museum", "Manek Chowk Food Market", "Sabarmati Riverfront"];
+        require(["esri/config", "esri/Map", "esri/views/MapView", "esri/Graphic", "esri/layers/GraphicsLayer"], function(esriConfig, Map, MapView, Graphic, GraphicsLayer) {
+        esriConfig.apiKey = "AAPKcd5dfc47a8364d949db24f83de49ac1dBfySJpI-cU4UPi21B1AxnPO2p98CQnW3Kh5DXzn3eomcmzTXq7C8mcF5spH1ONUx";
+
+  const map = new Map({
+    basemap: "arcgis-topographic" // Basemap layer service
+  });
+
+  const view = new MapView({
+    map: map,
+    container: "viewDiv",
+    center: [78.9629, 20.5937],
+    zoom: 5
+  });
+
+  const graphicsLayer = new GraphicsLayer();
+  map.add(graphicsLayer);
+
+  for (let i = 0; i < locs.length; i++) {
+    console.log(locs[i].split(",")[0]);
+    // create a point 
+    var point = {
+      type: "point",
+      longitude: parseFloat(locs[i].split(",")[0].trim()), // convert to float and trim any whitespace
+      latitude: parseFloat(locs[i].split(",")[1].trim()) // convert to float and trim any whitespace
+    };
+    var simpleMarkerSymbol = {
+      size: 7,
+      type: "simple-marker",
+      color: [46, 204, 113], // Green
+      outline: {
+        color: [255, 255, 255], // white
+        width: 1
+      }
+    };
+
+    var attributes = {
+      name: "Point",
+      description: name[i]
+    };
+
+    var pointGraphic = new Graphic({
+      geometry: point,
+      symbol: simpleMarkerSymbol,
+      attributes: attributes,
+      popupTemplate: {
+        title: attributes.name,
+        content: attributes.description
+      }
+    });
+
+    graphicsLayer.add(pointGraphic);
+  }
+});
+
+    </script>
+</head>
+<body>
+    <div id="viewDiv"></div>    
+</body>
+</html>

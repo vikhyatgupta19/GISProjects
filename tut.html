@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizing Feature Layer</title>
+    <style>
+        html,
+        body,
+        #viewDiv{
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.27/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.27/"></script>
+
+    <script>
+        //Calling required classes
+        require(["esri/config","esri/Map","esri/views/MapView","esri/layers/FeatureLayer"], function(esriConfig, Map, MapView, FeatureLayer){
+        esriConfig.apiKey = "AAPKcd5dfc47a8364d949db24f83de49ac1dBfySJpI-cU4UPi21B1AxnPO2p98CQnW3Kh5DXzn3eomcmzTXq7C8mcF5spH1ONUx";
+        //Adding Basic/Required Elements
+        const map = new Map({
+            basemap: "arcgis-topographic"
+        });
+        
+        const view = new MapView({
+            container: "viewDiv",
+            map: map,
+            center: [ 78.9629, 20.5937],
+            zoom: 5
+        });
+        //Setting Symbology & AddingFeature Layer
+        function createFillSymbol(value, color) {
+        return {
+          "value": value,
+          "symbol": {
+            "color": color,
+            "type": "simple-fill",
+            "style": "solid",
+            "outline": {
+              "style": "none"
+            }
+          },
+          "label": value
+        };
+      }
+
+      const statesRenderer = {
+        type: "unique-value",
+        field: "st_nm",
+        uniqueValueInfos: [
+          createFillSymbol("Arunanchal Pradesh", "#9E559C"),
+          createFillSymbol("Assam", "#A7C636"),
+          createFillSymbol("Bihar", "#149ECE"),
+          createFillSymbol("Jharkhand", "#ED5151"),
+          createFillSymbol("Andaman & Nicobar Island", "#ED5151"),
+          createFillSymbol("Andhra Pradesh","#149ECE"),
+          createFillSymbol("Chandigarh","#FFDE3E"),
+          createFillSymbol("Chhattisgarh", "#F789D8"),
+          createFillSymbol("Dadara & Nagar Havelli","#B7814A"),
+          createFillSymbol("Daman & Diu","#3CAF99"),
+          createFillSymbol("Goa", "#6B6BD6"),
+          createFillSymbol("Gujarat","#B54779"),
+          createFillSymbol("Haryana","#7F7F7F"),
+          createFillSymbol("Himachal Pradesh","#ED5151"),
+          createFillSymbol("Jammu & Kashmir","#149ECE"),
+          createFillSymbol("Karnataka","#9E559C"),
+          createFillSymbol("Kerala", "#FC921F"),
+          createFillSymbol("Lakshadweep","#FFDE3E"),
+          createFillSymbol("Madhya Pradesh","#F789D8"),
+          createFillSymbol("Maharashtra","#B7814A"),
+          createFillSymbol("Manipur","#3CAF99"),
+          createFillSymbol("Meghalaya","#6B6BD6"),
+          createFillSymbol("Mizoram","#B54779"),
+          createFillSymbol("Nagaland","#7F7F7F"),
+          createFillSymbol("Odisha","#ED5151"),
+          createFillSymbol("Puducherry","#149ECE"),
+          createFillSymbol("Punjab","#A7C636"),
+          createFillSymbol("Rajasthan","#9E559C"),
+          createFillSymbol("Sikkim","#FC921F"),
+          createFillSymbol("Tamil Nadu", "#FFDE3E"),
+          createFillSymbol("Telangana","#F789D8"),
+          createFillSymbol("Tripura","#B7814A"),
+          createFillSymbol("Uttar Pradesh","#3CAF99"),
+          createFillSymbol("Uttarakhand","#6B6BD6"),
+          createFillSymbol("West Bengal", "#B54779")
+
+        ]
+      };
+
+      const feature = new FeatureLayer({
+            url: "https://services6.arcgis.com/Cj6ppUYzylKGUnEi/arcgis/rest/services/Indian_States/FeatureServer",
+            renderer: statesRenderer
+        });
+
+        map.add(feature);
+    
+    })
+        
+
+    </script>
+</head>
+<body>
+    <div id="viewDiv"></div>
+</body>
+</html>

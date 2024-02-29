@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Map of Points </title>
+
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    
+    <link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.28/"></script>
+
+    <script>
+        require(["esri/config", "esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/widgets/Popup", "esri/widgets/Legend", "esri/widgets/LayerList", "esri/rest/query", "esri/rest/support/Query"], function (esriConfig, Map, MapView, FeatureLayer, Popup, Legend, LayerList, query, Query) {
+
+            esriConfig.apiKey = "AAPKcd5dfc47a8364d949db24f83de49ac1dBfySJpI-cU4UPi21B1AxnPO2p98CQnW3Kh5DXzn3eomcmzTXq7C8mcF5spH1ONUx";
+
+            const colors = ["#d92b30", "#3cccb4", "#ffdf3c", "#c27c30", "#f260a1"];
+
+            const commonProperties = {
+                type: "simple-marker",
+                width: "2px",
+                style: "circle"
+            };
+
+            const gujarat = {
+                ...commonProperties,
+                color: colors[0]
+            }
+            
+            const odisha = {
+                ...commonProperties,
+                color: colors[1]
+            }
+
+            const punjab = {
+                ...commonProperties,
+                color: colors[2]
+            }
+
+            const tamilnadu = {
+                ...commonProperties,
+                color: colors[3]
+            }
+
+            const other = {
+                ...commonProperties,
+                color: colors[4]
+            }
+
+            const ptrenderer = {
+                type: "unique-value",
+                legendOptions:{
+                    title: "State Name"
+            },
+            defaultSymbol: other,
+            defaultLabel: "Others",
+            field: "state",
+
+            uniqueValueInfos: [
+            {
+              value: "Gujarat", // code for Gujarat
+              symbol: gujarat,
+              label: "Gujarat"
+            },
+            {
+              value: "Odisha", // code for Odisha
+              symbol: odisha,
+              label: "Odisha"
+            },
+            {
+              value: "Punjab", // code for Punjab
+              symbol: punjab,
+              label: "Punjab"
+            },
+            {
+              value: "Tamil Nadu", // code for Tamil Nadu
+              symbol: tamilnadu,
+              label: "Tamil Nadu"
+            }
+          ]
+
+        }
+
+            const params = new Query({
+              returnGeometry: true,
+              outFields: ["*"]
+            });
+            
+            const map = new Map({
+                basemap: "arcgis-topographic"
+            });
+
+            const view = new MapView({
+                map: map,
+                center: [78.9629, 20.5937],
+                zoom: 5,
+                container: "viewDiv",
+                popup: new Popup({
+                    defaultPopupTemplateEnabled : true
+                }),
+            });
+
+            const featureLayer = new FeatureLayer({
+                url : "https://services6.arcgis.com/Cj6ppUYzylKGUnEi/arcgis/rest/services/India_Wetlands/FeatureServer",
+                renderer: ptrenderer
+            });
+
+            view.when(() => {
+            view.ui.add("optionsDiv", "bottom-right");
+            document.getElementById("doBtn").addEventListener("click", doQuery);
+             });
+
+            let layerView
+                view.whenLayerView(featureLayer).then((lv)=>{
+                    layerView = lv;
+                });
+
+            const attributeName = document.getElementById("attSelect");
+            const expressionSign = document.getElementById("signSelect");
+            const value = document.getElementById("valSelect");
+
+            function doQuery() {
+            // Clear the results from a previous query and close the popup if its open.
+            //featureLayer.removeAll();
+            console.log("Function is working")
+            if (view.popup.visible) {
+            view.closePopup();
+            }
+            
+            params.where = attributeName.value + expressionSign.value + "'" + value.value + "'";
+
+             // executes the query and calls getResults() once the promise is resolved
+             // promiseRejected() is called if the promise is rejected
+             featureLayer.queryFeatures(params).then(getResults).catch(promiseRejected);
+            }
+
+            let highlight;
+            function getResults(results){
+                highlight?.remove();
+                highlight = layerView.highlight(results.features);
+            }
+
+            //function getResults(results){
+                //const symbol = {
+                    //type: "simple-marker",
+                    //color : [20, 30, 100, 0.5],
+                    //outline: {
+                        //color: "white",
+                        //width: .5
+                    //}
+                //}
+
+                //results.features.map((feature) => {
+                    //feature.symbol = symbol
+                    //return feature
+                //})
+            //}
+
+             // Called each time the promise is rejected
+            function promiseRejected(error) {
+            console.error("Promise rejected: ", error.message);
+             }
+
+
+
+            view.when(()=>{
+                const layerlist = new LayerList({
+                    view : view
+                })
+            view.ui.add(layerlist, "top-right")
+            })
+
+            view.ui.add(new Legend({ view }), "bottom-left");
+
+            //const featureLayer = new FeatureLayer({
+                //url : "https://services6.arcgis.com/Cj6ppUYzylKGUnEi/arcgis/rest/services/India_Wetlands/FeatureServer",
+                //renderer: ptrenderer
+            //});
+
+            const statesLayer = new FeatureLayer({
+                url: "https://livingatlas.esri.in/server1/rest/services/IAB/State/MapServer/0"
+            })
+            //});   
+            map.add(statesLayer,0)
+            map.add(featureLayer)
+        });
+    </script>
+
+</head>
+<body>
+    <div id="viewDiv"></div>
+    <div class="esri-widget" id="optionsDiv">
+        <h2>Wetlands of India.</h2>
+        <select class="esri-widget" id="attSelect">
+          <option value="Name">Name</option>
+        </select>
+        <select class="esri-widget" id="signSelect">
+          <option value="=">is equal to</option>
+        </select>
+        <select class="esri-widget" id="valSelect">
+          <option value="Surinsar-Mansar Lakes">Surinsar-Mansar Lakes</option>
+          <option value="Rudrasagar Lake"> Rudrasagar Lake</option>
+          <option value="Renuka Wetland">Renuka Wetland</option>
+          <option value="Hokera Wetland">Hokera Wetland</option>
+          <option value="Chandertal Wetland">Chandertal Wetland</option>
+          <option value="Vembanad-Kol Wetland">Vembanad-Kol Wetland</option>
+          <option value="Tsomoriri">Tsomoriri</option>
+          <option value="Sasthamkotta Lake">Sasthamkotta Lake</option>
+          <option value="Point Calimere Wildlife and Bird Sanctuary">Point Calimere Wildlife and Bird Sanctuary</option>
+          <option value="Deepor Beel">Deepor Beel</option>
+          <option value="Bhoj Wetland">Bhoj Wetland</option>
+          <option value="Bhitarkanika Mangroves">Bhitarkanika Mangroves</option>
+          <option value="Ashtamudi Wetland">Ashtamudi Wetland</option>
+          <option value="Kolleru Lake">Kolleru Lake</option>
+          <option value="Shallbugh Wetland Conservation Reserve">Shallbugh Wetland Conservation Reserve</option>
+          <option value="Vellode Bird Sanctuary">Vellore Bird Sanctuary</option>
+          <option value="Pallikaranai Marsh Reserve Forest">Pallikaranai Marsh Reserve Forest</option>
+          <option value="Gulf of Mannar Marine Biosphere Reserve">Gulf of Mannar Marine Biosphere Reserve</option>
+          <option value="Kanjirankulam Bird Sanctuary">Kanjirankulam Bird Sanctuary</option>
+          <option value="Karikili Bird Sanctuary">Karikili Bird Sanctuary</option>
+          <option value="Pichavaram Mangrove">Pichavaram Mangrove</option>
+          <option value="Vaduvur Bird Sanctuary">Vaduvur Bird Sanctuary</option>
+          <option value="Ropar">Ropar</option>
+          <option value="Kanjli">Kanjli</option>
+          <option value="Vedanthangal Bird Sanctuary">Vedanthangal Bird Sanctuary</option>
+          <option value="Vembannur Wetland Complex">Vembannur Wetland Complex</option>
+
+        </select>
+        <br />
+        <br />
+        <button class="esri-widget" id="doBtn">Do Query</button> <br />
+        <p><span id="printResults"></span></p>
+      </div>
+</body>
+</html>
